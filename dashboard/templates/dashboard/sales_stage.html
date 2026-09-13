@@ -1,0 +1,67 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Sales Stage · Costing Studio{% endblock %}
+{% block heading %}Sales — Revised Register (engine){% endblock %}
+
+{% block content %}
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% else %}
+<section class="card compact">
+    <p class="upload-hint" style="margin:0">
+        Computed by the Python engine — a direct port of the
+        <strong>BuildRevisedSalesRegister</strong> macro (strategy §4.1). Finished-Goods
+        sales invoices/returns are kept, scrap &amp; non-FG excluded, trading items split
+        out. The reconciliation below must tie to <strong>zero</strong>.
+    </p>
+</section>
+
+<div class="kpi-grid" style="margin-bottom:14px">
+    <div class="card kpi-card" style="border-left:4px solid #4f6ef7">
+        <span class="kpi-label">Original data rows</span>
+        <span class="kpi-value" style="color:#4f6ef7">{{ recon_original }}</span>
+    </div>
+    <div class="card kpi-card" style="border-left:4px solid #1faa59">
+        <span class="kpi-label">Revised (retained)</span>
+        <span class="kpi-value" style="color:#1faa59">{{ revised_total }}</span>
+    </div>
+    <div class="card kpi-card" style="border-left:4px solid #d9a400">
+        <span class="kpi-label">Trading Items</span>
+        <span class="kpi-value" style="color:#d9a400">{{ recon_trading }}</span>
+    </div>
+    <div class="card kpi-card" style="border-left:4px solid #e4572e">
+        <span class="kpi-label">Other Exclusions</span>
+        <span class="kpi-value" style="color:#e4572e">{{ recon_excl }}</span>
+    </div>
+    <div class="card kpi-card {% if check_ok %}check-ok{% else %}check-bad{% endif %}">
+        <span class="kpi-label">Check (should be 0)</span>
+        <span class="kpi-value">{{ check_value }} {% if check_ok %}✓{% else %}✗{% endif %}</span>
+    </div>
+</div>
+
+<section class="card">
+    <div class="card-header"><h3>Exclusion breakdown</h3></div>
+    <table class="data-table">
+        <thead><tr><th>Reason</th><th class="num">Rows</th></tr></thead>
+        <tbody>
+        {% for reason, n in buckets.items %}
+            <tr><td>{{ reason }}</td><td class="num">{{ n }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<h2 class="dash-title">Revised Sales Register
+    <span class="dash-count">showing {{ revised_shown }} of {{ revised_total }}</span></h2>
+<div id="dash" class="dash"></div>
+{{ payload|json_script:"sheet-data" }}
+{% endif %}
+{% endblock %}
+
+{% block body_extra %}
+{% if payload %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{% static 'dashboard/js/sheetdash.js' %}?v=16"></script>
+{% endif %}
+{% endblock %}

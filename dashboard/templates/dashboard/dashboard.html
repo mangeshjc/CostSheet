@@ -1,0 +1,46 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Dashboard · Acme Admin{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="stat-grid">
+    {% for stat in stats %}
+    <div class="card stat-card">
+        <span class="stat-label">{{ stat.label }}</span>
+        <span class="stat-value">{{ stat.value }}</span>
+        <span class="stat-delta {% if stat.up %}up{% else %}down{% endif %}">
+            {{ stat.delta }}
+        </span>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <h2>Recent Orders</h2>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in recent %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer }}</td>
+                <td>{{ order.amount }}</td>
+                <td>
+                    <span class="badge badge-{{ order.status|lower }}">{{ order.status }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

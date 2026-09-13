@@ -1,0 +1,45 @@
+# Render blueprint. In Render: New -> Blueprint, point it at this repo.
+# Everything marked `sync: false` must be filled in by hand in the Render
+# dashboard (Environment tab) -- those are secrets and ids, so they are
+# deliberately not committed here. See DEPLOY.md.
+services:
+  - type: web
+    name: costsheet
+    runtime: python
+    # The free plan (512 MB RAM) sleeps after inactivity and can run out of
+    # memory on the larger workbooks. Move to `starter` if that bites.
+    plan: free
+    region: singapore
+    # Kept inline rather than in a build.sh: a shell script committed from
+    # Windows needs the executable bit and LF endings to run on Render, and
+    # getting either wrong fails the build.
+    buildCommand: >-
+      pip install --upgrade pip &&
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --no-input &&
+      python manage.py migrate
+    # Reading a large Google Sheet is slow (dashboard/google_drive.py sets a
+    # 180s socket timeout), so the worker timeout has to clear that or gunicorn
+    # kills the worker mid-request. Worker count comes from WEB_CONCURRENCY.
+    startCommand: >-
+      gunicorn dashboard_project.wsgi:application
+      --threads 4
+      --timeout 300
+      --access-logfile -
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      # The one value that must be set by hand: the contents of
+      # google_token.json, from `python manage.py google_token_env`.
+      # It already carries the client id and secret inside it.
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      # The Drive folder and Sheet ids are deliberately NOT listed here. They
+      # already have working values in settings.py, and listing them would make
+      # Render create them as blank variables -- which is how a deployment ends
+      # up pointing at nothing while the local copy works. Add one here only to
+      # point this deployment at a different folder or workbook.

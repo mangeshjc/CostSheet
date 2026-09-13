@@ -1,0 +1,52 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Sales Dashboard & Reconciliation · Costing Studio{% endblock %}
+{% block heading %}Sales Dashboard & Reconciliation{% endblock %}
+
+{% block content %}
+<section class="card compact">
+    <form method="post" class="erp-picker" data-busy="Loading workbook">
+        {% csrf_token %}
+        <label for="file-select">Source file</label>
+        <select name="file" id="file-select">
+            <option value="">— choose a file —</option>
+            {% for f in files %}
+            <option value="{{ f.id }}" {% if f.id == selected %}selected{% endif %}>{{ f.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary">Open</button>
+        {% if workbook %}
+        <a href="{{ workbook.url }}" target="_blank" rel="noopener" class="btn-link">Open in Sheets ↗</a>
+        {% endif %}
+    </form>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+</section>
+
+{% if workbook %}
+<div class="sheet-tabs">
+    {% for t in workbook.tabs %}
+    <a href="?wb={{ workbook.file_id }}&tab={{ t|urlencode }}"
+       class="sheet-tab {% if t == workbook.active_tab %}active{% endif %}">{{ t }}</a>
+    {% endfor %}
+</div>
+
+<h2 class="dash-title">{{ workbook.active_tab }}</h2>
+<div id="dash" class="dash"></div>
+{{ workbook.payload|json_script:"sheet-data" }}
+{% else %}
+<section class="card empty-state">
+    <div class="empty-icon">▦</div>
+    <h2>No workbook selected</h2>
+    <p>Choose the <strong>Sales Dashboard &amp; Reconciliation</strong> file above and
+       click <strong>Open</strong> to view it here as a dashboard.</p>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block body_extra %}
+{% if workbook %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{% static 'dashboard/js/sheetdash.js' %}?v=16"></script>
+{% endif %}
+{% endblock %}

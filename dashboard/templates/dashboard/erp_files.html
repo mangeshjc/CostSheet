@@ -1,0 +1,77 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}ERP Files · Acme Admin{% endblock %}
+{% block heading %}ERP Files{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="card-header">
+        <h2>ERP source files</h2>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="get" class="erp-picker">
+        <label for="file-select">Select a file</label>
+        <select name="file" id="file-select">
+            <option value="">— choose a Google Sheet —</option>
+            {% for f in files %}
+            <option value="{{ f.id }}" {% if f.id == selected %}selected{% endif %}>
+                {{ f.name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary">Submit</button>
+    </form>
+
+    {% if not error and not files %}
+        <p class="upload-hint">No Google Sheets found in the ERP source folder yet.</p>
+    {% endif %}
+</section>
+
+{% if sheet %}
+<section class="card">
+    <div class="card-header sheet-head">
+        <h2>{{ sheet.title }}</h2>
+        <a href="{{ sheet.url }}" target="_blank" rel="noopener" class="btn-link">
+            Open in Google Sheets ↗
+        </a>
+    </div>
+
+    {% if sheet.tabs|length > 1 %}
+    <div class="tab-bar">
+        {% for t in sheet.tabs %}
+        <a href="?file={{ selected }}&tab={{ t|urlencode }}"
+           class="tab {% if t == sheet.active_tab %}tab-active{% endif %}">{{ t }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if sheet.truncated %}
+    <div class="alert alert-warning">Showing the first 500 rows of this sheet.</div>
+    {% endif %}
+
+    <div class="table-scroll">
+        <table class="data-table sheet-table">
+            {% for row in sheet.rows %}
+                {% if forloop.first %}
+                <thead>
+                    <tr>
+                        {% for cell in row %}<th>{{ cell }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% else %}
+                    <tr>
+                        {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

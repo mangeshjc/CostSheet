@@ -1,0 +1,45 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Upload ERP File · Acme Admin{% endblock %}
+{% block heading %}Upload ERP File{% endblock %}
+
+{% block content %}
+<section class="card upload-card">
+    <div class="card-header">
+        <h2>Upload ERP Excel file</h2>
+    </div>
+    <p class="upload-hint">
+        Select an Excel file (<strong>.xlsx</strong> or <strong>.xls</strong>).
+        It is uploaded to your Drive folder and converted to a Google Sheet.
+    </p>
+
+    <form method="post" enctype="multipart/form-data" class="upload-form" data-busy="Uploading & converting">
+        {% csrf_token %}
+
+        <label for="{{ form.excel_file.id_for_label }}" class="dropzone">
+            <span class="dropzone-icon">⭱</span>
+            <span class="dropzone-text">Click to choose an Excel file</span>
+            <span class="dropzone-sub">Accepted: .xlsx, .xls</span>
+        </label>
+        <div class="file-input">{{ form.excel_file }}</div>
+
+        {% if form.excel_file.errors %}
+            <div class="field-error">{{ form.excel_file.errors|striptags }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn-primary">Upload to Google Sheet</button>
+    </form>
+
+    {% if result %}
+    <div class="upload-result">
+        <h3>Last upload</h3>
+        <ul>
+            <li><strong>Google Sheet:</strong> {{ result.name }}</li>
+        </ul>
+        <a href="{{ result.sheet_url }}" target="_blank" rel="noopener" class="btn-link">
+            Open Google Sheet ↗
+        </a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

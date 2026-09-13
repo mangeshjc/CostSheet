@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Costing Studio{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}?v=16">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <input type="checkbox" id="sidebar-toggle" hidden>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="logo">◆</span>
+                <span class="brand-name">Costing Studio</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard:dashboard' %}"
+                   class="nav-item {% if active == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon">◧</span> Overview
+                </a>
+                <a href="{% url 'dashboard:upload_erp' %}"
+                   class="nav-item {% if active == 'upload' %}active{% endif %}">
+                    <span class="nav-icon">⭱</span> Upload &amp; Convert
+                </a>
+                <a href="{% url 'dashboard:erp_files' %}"
+                   class="nav-item {% if active == 'erp_files' %}active{% endif %}">
+                    <span class="nav-icon">▦</span> ERP Source Files
+                </a>
+
+                <div class="nav-section">Data Files</div>
+
+                <details class="nav-group" open>
+                    <summary class="nav-item nav-group-summary">
+                        <span class="nav-icon">🗀</span>
+                        <span class="nav-group-label">01. ERP Source File</span>
+                        <span class="nav-caret">▸</span>
+                    </summary>
+                    <div class="nav-subitems">
+                        <a href="{% url 'dashboard:erp_files' %}"
+                           class="nav-subitem {% if active == 'erp_files' %}active{% endif %}">
+                            Source sheets
+                        </a>
+                    </div>
+                </details>
+
+                <details class="nav-group"
+                    {% if active == 'artr' or active == 'sales_recon' %}open{% endif %}>
+                    <summary class="nav-item nav-group-summary">
+                        <span class="nav-icon">🗀</span>
+                        <span class="nav-group-label">02. Sales, Consumption &amp; Production</span>
+                        <span class="nav-caret">▸</span>
+                    </summary>
+                    <div class="nav-subitems">
+                        <a href="{% url 'dashboard:artr_data' %}"
+                           class="nav-subitem {% if active == 'artr' %}active{% endif %}">
+                            ARTR Data
+                        </a>
+                        <a href="{% url 'dashboard:sales_recon' %}"
+                           class="nav-subitem {% if active == 'sales_recon' %}active{% endif %}">
+                            Sales Dashboard &amp; Reconciliation
+                        </a>
+                        <a href="{% url 'dashboard:sales_stage' %}"
+                           class="nav-subitem {% if active == 'sales_stage' %}active{% endif %}">
+                            Revised Register (engine) <span class="soon" style="background:#1faa5933;color:#1faa59">live</span>
+                        </a>
+                    </div>
+                </details>
+
+                <details class="nav-group">
+                    <summary class="nav-item nav-group-summary">
+                        <span class="nav-icon">🗀</span>
+                        <span class="nav-group-label">03. Expense</span>
+                        <span class="nav-caret">▸</span>
+                    </summary>
+                    <div class="nav-subitems">
+                        <span class="nav-subitem is-soon">JVR Data <span class="soon">soon</span></span>
+                        <span class="nav-subitem is-soon">APTR <span class="soon">soon</span></span>
+                        <span class="nav-subitem is-soon">Depreciation <span class="soon">soon</span></span>
+                    </div>
+                </details>
+
+                <details class="nav-group">
+                    <summary class="nav-item nav-group-summary">
+                        <span class="nav-icon">🗀</span>
+                        <span class="nav-group-label">04. Other data</span>
+                        <span class="nav-caret">▸</span>
+                    </summary>
+                    <div class="nav-subitems">
+                        <span class="nav-subitem is-soon">Labour Hours <span class="soon">soon</span></span>
+                        <span class="nav-subitem is-soon">Packing (BOM) <span class="soon">soon</span></span>
+                    </div>
+                </details>
+
+                <div class="nav-section">Output</div>
+                <a href="{% url 'dashboard:horizontal_cs' %}"
+                   class="nav-item {% if active == 'horizontal_cs' %}active{% endif %}">
+                    <span class="nav-icon">▣</span> Horizontal Cost Sheet
+                </a>
+
+                <div class="nav-section">System</div>
+                <a href="{% url 'dashboard:settings' %}"
+                   class="nav-item {% if active == 'settings' %}active{% endif %}">
+                    <span class="nav-icon">⚙</span> Settings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="avatar">A</div>
+                <div class="user-meta">
+                    <span class="user-name">Admin</span>
+                    <span class="user-email">automation@jollyclamps.com</span>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <label for="sidebar-toggle" class="menu-btn">☰</label>
+                <h1 class="page-title">{% block heading %}Overview{% endblock %}</h1>
+                <div class="topbar-actions">
+                    {% block topbar_actions %}{% endblock %}
+                </div>
+            </header>
+            <main class="content">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <div id="toploader" aria-hidden="true"></div>
+    <div id="busy-overlay" hidden>
+        <div class="busy-card">
+            <div class="spinner"></div>
+            <div class="busy-title" id="busy-title">Working…</div>
+            <div class="busy-msg" id="busy-msg">Getting started…</div>
+            <div class="busy-hint">This can take up to a minute — please keep this tab open.</div>
+        </div>
+    </div>
+    <script>
+    (function () {
+        var bar = document.getElementById("toploader");
+        var overlay = document.getElementById("busy-overlay");
+        var msgEl = document.getElementById("busy-msg");
+        var titleEl = document.getElementById("busy-title");
+        var timer = null;
+        function startBar() { if (bar) bar.className = "active"; }
+        var MSGS = ["Reading ERP data…", "Converting rows…", "Enriching with rates…",
+                    "Building live pivots…", "Saving to your Drive…", "Almost there…"];
+        // Global helpers so pages can drive the overlay (e.g. AJAX builds).
+        window.showBusy = function (title) {
+            titleEl.textContent = title || "Working…";
+            overlay.hidden = false;
+            var i = 0; msgEl.textContent = MSGS[0];
+            if (timer) clearInterval(timer);
+            timer = setInterval(function () { i = (i + 1) % MSGS.length; msgEl.textContent = MSGS[i]; }, 3000);
+        };
+        window.hideBusy = function () { overlay.hidden = true; if (timer) clearInterval(timer); };
+        // any navigation / form submit → show the thin top progress bar
+        window.addEventListener("beforeunload", startBar);
+        // long-running NON-ajax forms (tagged data-busy) → full overlay + navigate
+        document.querySelectorAll("form[data-busy]").forEach(function (f) {
+            f.addEventListener("submit", function () {
+                var sel = f.querySelector("select");
+                if (sel && sel.value === "") return;
+                window.showBusy(f.getAttribute("data-busy"));
+            });
+        });
+        // if the page is restored from bfcache, hide the overlay/bar
+        window.addEventListener("pageshow", function (e) {
+            if (e.persisted) { overlay.hidden = true; if (bar) bar.className = ""; if (timer) clearInterval(timer); }
+        });
+    })();
+    </script>
+    {% block body_extra %}{% endblock %}
+</body>
+</html>

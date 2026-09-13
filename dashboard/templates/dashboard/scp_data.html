@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{{ section_title }} · Acme Admin{% endblock %}
+{% block heading %}{{ section_title }}{% endblock %}
+
+{% block content %}
+<section class="card placeholder">
+    <h2>{{ section_title }}</h2>
+    <p>This section is ready. Connect a Google Sheet or data source to display
+       its data here.</p>
+</section>
+{% endblock %}

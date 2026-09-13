@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · Costing Studio{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+
+{% block content %}
+{% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+{% if workbook %}
+<section class="card compact">
+    <div class="sheet-head" style="justify-content:space-between;">
+        <span class="upload-hint" style="margin:0;">
+            {{ workbook.tabs|length }} sheet{{ workbook.tabs|length|pluralize }} · showing
+            <strong>{{ workbook.active_tab }}</strong>
+        </span>
+        <a href="{{ workbook.url }}" target="_blank" rel="noopener" class="btn-link">Open in Sheets ↗</a>
+    </div>
+</section>
+
+<div class="sheet-tabs">
+    {% for t in workbook.tabs %}
+    <a href="?tab={{ t|urlencode }}"
+       class="sheet-tab {% if t == workbook.active_tab %}active{% endif %}">{{ t }}</a>
+    {% endfor %}
+</div>
+
+<h2 class="dash-title">{{ workbook.active_tab }}</h2>
+<div id="dash" class="dash"></div>
+{{ workbook.payload|json_script:"sheet-data" }}
+{% endif %}
+{% endblock %}
+
+{% block body_extra %}
+{% if workbook %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{% static 'dashboard/js/sheetdash.js' %}?v=16"></script>
+{% endif %}
+{% endblock %}
